@@ -129,6 +129,18 @@ docker compose run --rm app ./bin/generate bmm:split openehr_base_1.3.0
 docker compose run --rm app ./bin/generate bmm:split all
 ```
 
+Generate Deno/TypeScript/JavaScript library from BMM JSON files:
+```bash
+docker compose run --rm app ./bin/generate bmm:deno <filename>
+```
+Examples
+```bash
+# Specific files
+docker compose run --rm app ./bin/generate bmm:deno openehr_base_1.3.0 openehr_rm_1.2.0
+# Or generate for all schemas
+docker compose run --rm app ./bin/generate bmm:deno all
+```
+
 
 ## Testing
 

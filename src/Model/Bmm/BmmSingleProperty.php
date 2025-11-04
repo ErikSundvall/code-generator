@@ -1,10 +1,9 @@
-<?php /** @noinspection PhpMissingParentConstructorInspection */
+<?php
 
 namespace OpenEHR\Tools\CodeGen\Model\Bmm;
 
 use JsonSerializable;
 use OpenEHR\Tools\CodeGen\Model\YamlSerializable;
-use Symfony\Component\Yaml\Tag\TaggedValue;
 
 /**
  * Class representing a BMM single property
@@ -12,19 +11,12 @@ use Symfony\Component\Yaml\Tag\TaggedValue;
 readonly class BmmSingleProperty extends AbstractBmmProperty implements JsonSerializable, YamlSerializable
 {
 
-    /**
-     * @param string $name
-     * @param string $type
-     * @param string|null $documentation
-     * @param bool|null $isMandatory
-     */
     public function __construct(
-        public string $name,
-        public string $type,
-        public ?string $documentation = null,
-        public ?bool $isMandatory = false,
+        string $name,
+        public BmmSimpleType|BmmContainerType|BmmGenericType $typeDef,
     )
     {
+        parent::__construct($name);
     }
 
     /**
@@ -33,30 +25,23 @@ readonly class BmmSingleProperty extends AbstractBmmProperty implements JsonSeri
     public function jsonSerialize(): array
     {
         return array_filter([
-            '_type' => 'P_BMM_SINGLE_PROPERTY',
             'name' => $this->name,
-            'documentation' => $this->documentation,
-            'is_mandatory' => $this->isMandatory,
-            'type' => $this->type,
+            'type_def' => $this->typeDef,
         ]);
     }
 
     /**
-     * @return TaggedValue
+     * @return array<string, mixed>
      */
-    public function yamlSerialize(): TaggedValue
+    public function yamlSerialize(): array
     {
-        return new TaggedValue('P_BMM_SINGLE_PROPERTY', array_filter([
+        return array_filter([
             'name' => $this->name,
-            'documentation' => $this->documentation,
-            'is_mandatory' => $this->isMandatory,
-            'type' => $this->type,
-        ]));
+            'type_def' => $this->typeDef->yamlSerialize(),
+        ]);
     }
 
     /**
-     * Create a BMMSingleProperty from a JSON array
-     *
      * @param array<string, mixed> $data
      * @return self
      */
@@ -64,9 +49,7 @@ readonly class BmmSingleProperty extends AbstractBmmProperty implements JsonSeri
     {
         return new self(
             name: $data['name'],
-            type: $data['type'] ?? 'Any',
-            documentation: $data['documentation'] ?? null,
-            isMandatory: $data['is_mandatory'] ?? false,
+            typeDef: AbstractBmmType::fromArray($data['type_def']),
         );
     }
 }

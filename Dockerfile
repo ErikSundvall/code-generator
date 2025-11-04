@@ -23,5 +23,8 @@ RUN install-php-extensions \
 
 WORKDIR /opt/project
 
+# Change ownership to the local user
+RUN chown -R ${user}:${group} /opt/project
+
 # Switch to user
 USER ${uid}

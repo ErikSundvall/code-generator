@@ -1,0 +1,44 @@
+{
+    "bmm_version": "2.4",
+    "rm_publisher": "test",
+    "schema_name": "test_schema",
+    "rm_release": "1.0.0",
+    "schema_revision": "1.0.0",
+    "schema_lifecycle_state": "test",
+    "schema_description": "test",
+    "schema_author": "test",
+    "packages": [
+        {
+            "name": "TestPackage",
+            "classes": [
+                "TestClass"
+            ]
+        }
+    ],
+    "class_definitions": {
+        "TestClass": {
+            "name": "TestClass",
+            "ancestors": [],
+            "properties": [
+                {
+                    "_type": "P_BMM_SINGLE_PROPERTY",
+                    "name": "test_property",
+                    "type_def": {
+                        "_type": "BMM_SIMPLE_TYPE",
+                        "type": "STRING"
+                    }
+                }
+            ],
+            "functions": [
+                {
+                    "name": "test_function",
+                    "parameters": [],
+                    "result": {
+                        "_type": "BMM_SIMPLE_TYPE",
+                        "type": "STRING"
+                    }
+                }
+            ]
+        }
+    }
+}
