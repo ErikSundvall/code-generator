@@ -1,4 +1,5 @@
 <?php
+// Paste this code into src/Model/Bmm/BmmSingleFunctionParameterOpen.php
 
 namespace OpenEHR\Tools\CodeGen\Model\Bmm;
 
@@ -6,14 +7,13 @@ use JsonSerializable;
 use OpenEHR\Tools\CodeGen\Model\YamlSerializable;
 
 /**
- * Class representing a BMM single property
+ * Class representing a BMM single function parameter open
  */
-readonly class BmmSingleProperty extends AbstractBmmProperty implements JsonSerializable, YamlSerializable
+readonly class BmmSingleFunctionParameterOpen extends AbstractBmmFunctionParameter implements JsonSerializable, YamlSerializable
 {
-
     public function __construct(
         string $name,
-        public BmmSimpleType|BmmContainerType|BmmGenericType $typeDef,
+        public string $type,
     )
     {
         parent::__construct($name);
@@ -26,7 +26,7 @@ readonly class BmmSingleProperty extends AbstractBmmProperty implements JsonSeri
     {
         return array_filter([
             'name' => $this->name,
-            'type_def' => $this->typeDef,
+            'type' => $this->type,
         ]);
     }
 
@@ -35,10 +35,7 @@ readonly class BmmSingleProperty extends AbstractBmmProperty implements JsonSeri
      */
     public function yamlSerialize(): array
     {
-        return array_filter([
-            'name' => $this->name,
-            'type_def' => $this->typeDef->yamlSerialize(),
-        ]);
+        return $this->jsonSerialize();
     }
 
     /**
@@ -47,21 +44,9 @@ readonly class BmmSingleProperty extends AbstractBmmProperty implements JsonSeri
      */
     public static function fromArray(array $data): self
     {
-        if (isset($data['type']) && !isset($data['type_def'])) {
-            $data['type_def'] = [
-                '_type' => 'BMM_SIMPLE_TYPE',
-                'type' => $data['type'],
-            ];
-        } elseif (!isset($data['type_def'])) {
-            $data['type_def'] = [
-                '_type' => 'BMM_SIMPLE_TYPE',
-                'type' => 'ANY',
-            ];
-        }
-
         return new self(
             name: $data['name'],
-            typeDef: AbstractBmmType::fromArray($data['type_def']),
+            type: $data['type'],
         );
     }
 }
