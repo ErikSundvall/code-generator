@@ -10,6 +10,10 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
+/**
+ * Command to generate Javascript+TypeScript libraries
+ * (targeting runtime: Deno and browsers) based on indicated BMM schema(s)
+ */     
 class BmmDenoCommand extends Command
 {
     protected function configure(): void
@@ -25,26 +29,31 @@ class BmmDenoCommand extends Command
         );
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output): int
-    {
-        $toRead = $input->getArgument('read');
-        if (empty($toRead)) {
-            $output->writeln('<error>Please specify which BMM schema should be read. See usage with --help.</error>');
-            return Command::INVALID;
-        }
-        try {
-            $reader = new BmmJsonReader();
-            foreach ($toRead as $schema) {
-                $reader->read($schema);
-            }
-            $writer = new CodeGenerator($reader);
-            $writer->addWriter(new BmmDenoWriter());
-            $writer->generate();
-        } catch (\UnhandledMatchError $e) {
-            $output->writeln((string)$e);
-            return Command::FAILURE;
-        }
 
-        return Command::SUCCESS;
+protected function execute(InputInterface $input, OutputInterface $output): int
+{
+    $toRead = $input->getArgument('read');
+    if (empty($toRead)) {
+        $output->writeln('<error>Please specify which BMM schema should be read. See usage with --help.</error>');
+        return Command::INVALID;
     }
+    if ($toRead[0] === 'all') {
+        $toRead = array_map(fn($filename) => basename($filename, '.bmm.json'), glob(BmmJsonReader::DIR . '*.bmm.json'));
+    }
+    try {
+        $reader = new BmmJsonReader();
+        foreach ($toRead as $schema) {
+            $reader->read($schema);
+        }
+        $writer = new CodeGenerator($reader);
+        $writer->addWriter(new BmmDenoWriter());
+        $writer->generate();
+    } catch (\Throwable $e) {
+        $output->writeln((string)$e);
+        return Command::FAILURE;
+    }
+
+    return Command::SUCCESS;
+    }
+
 }

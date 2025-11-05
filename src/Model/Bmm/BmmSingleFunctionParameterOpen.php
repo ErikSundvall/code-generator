@@ -1,30 +1,22 @@
-<?php /** @noinspection PhpMissingParentConstructorInspection */
+<?php
 
 namespace OpenEHR\Tools\CodeGen\Model\Bmm;
 
 use JsonSerializable;
 use OpenEHR\Tools\CodeGen\Model\YamlSerializable;
-use Symfony\Component\Yaml\Tag\TaggedValue;
 
 /**
- * Class representing a BMM single function parameter
+ * Class representing a BMM single property
  */
-readonly class BmmSingleFunctionParameterOpen extends AbstractBmmFunctionParameter implements JsonSerializable, YamlSerializable
+readonly class BmmSingleProperty extends AbstractBmmProperty implements JsonSerializable, YamlSerializable
 {
 
-    /**
-     * @param string $name
-     * @param string $type
-     * @param string|null $documentation
-     * @param bool|null $isNullable
-     */
     public function __construct(
-        public string $name,
-        public string $type,
-        public ?string $documentation = null,
-        public ?bool $isNullable = false,
+        string $name,
+        public BmmSimpleType|BmmContainerType|BmmGenericType $typeDef,
     )
     {
+        parent::__construct($name);
     }
 
     /**
@@ -33,40 +25,43 @@ readonly class BmmSingleFunctionParameterOpen extends AbstractBmmFunctionParamet
     public function jsonSerialize(): array
     {
         return array_filter([
-            '_type' => 'P_BMM_SINGLE_FUNCTION_PARAMETER_OPEN',
             'name' => $this->name,
-            'documentation' => $this->documentation,
-            'is_nullable' => $this->isNullable,
-            'type' => $this->type,
+            'type_def' => $this->typeDef,
         ]);
     }
 
     /**
-     * @return TaggedValue
+     * @return array<string, mixed>
      */
-    public function yamlSerialize(): TaggedValue
+    public function yamlSerialize(): array
     {
-        return new TaggedValue('P_BMM_SINGLE_FUNCTION_PARAMETER_OPEN', array_filter([
+        return array_filter([
             'name' => $this->name,
-            'documentation' => $this->documentation,
-            'is_nullable' => $this->isNullable,
-            'type' => $this->type,
-        ]));
+            'type_def' => $this->typeDef->yamlSerialize(),
+        ]);
     }
 
     /**
-     * Create a BMMSingleFunctionParameter from a JSON array
-     *
      * @param array<string, mixed> $data
      * @return self
      */
     public static function fromArray(array $data): self
     {
+        if (isset($data['type']) && !isset($data['type_def'])) {
+            $data['type_def'] = [
+                '_type' => 'BMM_SIMPLE_TYPE',
+                'type' => $data['type'],
+            ];
+        } elseif (!isset($data['type_def'])) {
+            $data['type_def'] = [
+                '_type' => 'BMM_SIMPLE_TYPE',
+                'type' => 'ANY',
+            ];
+        }
+
         return new self(
             name: $data['name'],
-            type: $data['type'],
-            documentation: $data['documentation'] ?? null,
-            isNullable: $data['is_nullable'] ?? false,
+            typeDef: AbstractBmmType::fromArray($data['type_def']),
         );
     }
 }
