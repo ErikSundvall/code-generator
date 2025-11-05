@@ -2,7 +2,7 @@
 
 namespace Console\Command;
 
-use OpenEHR\Tools\CodeGen\Reader\BmmReader;
+use OpenEHR\Tools\CodeGen\Reader\BmmJsonReader;
 use OpenEHR\Tools\CodeGen\CodeGenerator;
 use OpenEHR\Tools\CodeGen\Writer\BmmDenoWriter;
 use Symfony\Component\Console\Command\Command;
@@ -33,7 +33,7 @@ class BmmDenoCommand extends Command
             return Command::INVALID;
         }
         try {
-            $reader = new BmmReader();
+            $reader = new BmmJsonReader();
             foreach ($toRead as $schema) {
                 $reader->read($schema);
             }
