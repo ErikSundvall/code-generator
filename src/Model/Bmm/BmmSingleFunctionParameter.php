@@ -1,73 +1,63 @@
-<?php /** @noinspection PhpMissingParentConstructorInspection */
+<?php
+// Paste this code into src/Model/Bmm/BmmSingleFunctionParameter.php
 
 namespace OpenEHR\Tools\CodeGen\Model\Bmm;
 
 use JsonSerializable;
 use OpenEHR\Tools\CodeGen\Model\YamlSerializable;
-use Symfony\Component\Yaml\Tag\TaggedValue;
 
-/**
- * Class representing a BMM single function parameter
- */
 readonly class BmmSingleFunctionParameter extends AbstractBmmFunctionParameter implements JsonSerializable, YamlSerializable
 {
-
-    /**
-     * @param string $name
-     * @param string $type
-     * @param string|null $documentation
-     * @param bool|null $isNullable
-     */
     public function __construct(
-        public string $name,
-        public string $type,
-        public ?string $documentation = null,
-        public ?bool $isNullable = false,
+        string $name,
+        public BmmSimpleType|BmmContainerType|BmmGenericType $typeDef,
     )
     {
+        parent::__construct($name);
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     public function jsonSerialize(): array
     {
-
         return array_filter([
-            '_type' => 'P_BMM_SINGLE_FUNCTION_PARAMETER',
             'name' => $this->name,
-            'documentation' => $this->documentation,
-            'is_nullable' => $this->isNullable,
-            'type' => $this->type,
+            'type_def' => $this->typeDef,
         ]);
     }
 
-    /**
-     * @return TaggedValue
-     */
-    public function yamlSerialize(): TaggedValue
+    public function yamlSerialize(): array
     {
-        return new TaggedValue('P_BMM_SINGLE_FUNCTION_PARAMETER', array_filter([
+        return array_filter([
             'name' => $this->name,
-            'documentation' => $this->documentation,
-            'is_nullable' => $this->isNullable,
-            'type' => $this->type,
-        ]));
+            'type_def' => $this->typeDef->yamlSerialize(),
+        ]);
     }
 
-    /**
-     * Create a BMMSingleFunctionParameter from a JSON array
-     *
-     * @param array<string, mixed> $data
-     * @return self
-     */
     public static function fromArray(array $data): self
     {
+        $typeDefData = null;
+
+        // Case 1: The modern 'type_def' object exists.
+        if (isset($data['type_def']) && is_array($data['type_def'])) {
+            $typeDefData = $data['type_def'];
+        }
+        // Case 2: The legacy 'type' string exists.
+        elseif (isset($data['type'])) {
+            $typeDefData = [
+                '_type' => 'BMM_SIMPLE_TYPE',
+                'type' => $data['type'],
+            ];
+        }
+        // Case 3: Neither exists, so we must default to 'ANY' to prevent a crash.
+        else {
+            $typeDefData = [
+                '_type' => 'BMM_SIMPLE_TYPE',
+                'type' => 'ANY',
+            ];
+        }
+
         return new self(
             name: $data['name'],
-            type: $data['type'] ?? 'Any',
-            documentation: $data['documentation'] ?? null,
-            isNullable: $data['is_nullable'] ?? false,
+            typeDef: AbstractBmmType::fromArray($typeDefData)
         );
     }
 }

@@ -16,6 +16,7 @@ use Console\Command\BmmJsonToAsciiDoc;
 use Console\Command\BmmJsonToClassJson;
 use Console\Command\XmiToBmm;
 use Console\Command\XmiToInternalModel;
+use Console\Command\BmmDenoCommand;
 use Symfony\Component\Console\Application;
 
 try {
@@ -27,6 +28,7 @@ try {
     $console->add(new BmmJsonToPlantUml());
     $console->add(new BmmJsonToAsciiDoc());
     $console->add(new BmmJsonToClassJson());
+    $console->add(new BmmDenoCommand());
     exit($console->run());
 } catch (\Throwable $exception) {
     error_log((string)$exception);

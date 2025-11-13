@@ -129,6 +129,22 @@ docker compose run --rm app ./bin/generate bmm:split openehr_base_1.3.0
 docker compose run --rm app ./bin/generate bmm:split all
 ```
 
+Generate Deno/TypeScript/JavaScript library from BMM JSON files:
+```bash
+docker compose run --rm app ./bin/generate bmm:deno <filename>
+```
+Examples
+```bash
+# Specific files
+docker compose run --rm app ./bin/generate bmm:deno openehr_base_1.3.0 openehr_rm_1.2.0
+# Or generate for all schemas
+docker compose run --rm app ./bin/generate bmm:deno all
+```
+TODO, things not yet fixed in bmm:deno
+- Split JS and TS to separate subtrees under code/deno do that we get JS in code/deno/js/ and TS in code/deno/ts instead of having them mixed
+- if the "all" parameter is used, tehen versions risk overwriting each other. add another level per version so it follows the patterns code/deno/{{version}}/js/ and code/deno/{{version}}/ts/ 
+- Rename "Deno" to js-ts
+
 
 ## Testing
 
